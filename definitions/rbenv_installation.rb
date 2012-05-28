@@ -30,6 +30,8 @@ define :rbenv_installation,
   params[:rbenv_root] ||= "#{node[:rbenv][:install_prefix]}/rbenv"
   params[:ruby_build_bin_path] ||= "#{node[:ruby_build][:prefix]}/bin"
 
+  include_recipe "build-essential"
+
   package "curl"
 
   case node[:platform]
@@ -38,6 +40,9 @@ define :rbenv_installation,
     package "openssl"
     package "libssl-dev"
     package "libreadline-dev"
+  when "redhat", "centos", "fedora"
+    package "openssl-devel"
+    package "readline-devel"
   end
 
   include_recipe "git"
