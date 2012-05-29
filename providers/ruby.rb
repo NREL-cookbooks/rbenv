@@ -48,6 +48,17 @@ action :install do
     end
     new_resource.updated_by_last_action(true)
   end
+
+  # Create a symlink to the real gem directory. This is done so that at compile
+  # time we have a predictable path where the gems will be installed (instead
+  # of having to wait until convergence which means wrapping everything inside
+  # ruby_block statements).
+  predictable_gem_dir = "#{node[:rbenv][:install_prefix]}/rbenv/versions/#{@ruby.name}/gems"
+  unless(::File.exists?(predictable_gem_dir))
+    real_gem_dir = `rbenv exec gem env gemdir`.strip
+    ::FileUtils.ln_s(real_gem_dir, predictable_gem_dir) 
+    new_resource.updated_by_last_action(true)
+  end
 end
 
 def load_current_resource
