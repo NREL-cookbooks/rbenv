@@ -86,6 +86,12 @@ define :rbenv_installation,
     code "source /etc/profile.d/rbenv.sh"
   end
 
+  # Update the current chef session with the new environment variables so other
+  # cookbooks can use rbenv's ruby installation after its first installed
+  # (before the default environment already contains all this).
+  ENV["RBENV_ROOT"] = params[:rbenv_root]
+  ENV["PATH"] = "#{params[:rbenv_root]}/shims:#{params[:rbenv_root]}/bin:#{params[:ruby_build_bin_path]}:#{ENV["PATH"]}"
+
   bash "set_permissions_on_rbenv_root" do
     code <<-EOH
       chown -R rbenv:rbenv #{params[:rbenv_root]}
