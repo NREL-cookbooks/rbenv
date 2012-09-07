@@ -1,4 +1,5 @@
 include_recipe "rbenv"
+include_recipe "rbenv::ruby_build"
 include_recipe "rbenv::ohai_plugin"
 
 rbenv_ruby(node[:rbenv][:install_global_version]) do

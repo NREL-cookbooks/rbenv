@@ -53,12 +53,12 @@ action :install do
   # time we have a predictable path where the gems will be installed (instead
   # of having to wait until convergence which means wrapping everything inside
   # ruby_block statements).
-  predictable_gem_dir = "#{node[:rbenv][:install_prefix]}/rbenv/versions/#{@ruby.name}/gems"
+  predictable_gem_dir = "#{node[:rbenv][:install_prefix]}/rbenv/versions/#{new_resource.name}/gems"
   unless(::File.exists?(predictable_gem_dir))
     out = rbenv_command("exec gem env gemdir")
     real_gem_dir = out.stdout.strip
 
-    ::FileUtils.ln_s(real_gem_dir, predictable_gem_dir) 
+    ::FileUtils.ln_s(real_gem_dir, predictable_gem_dir)
     new_resource.updated_by_last_action(true)
   end
 end
