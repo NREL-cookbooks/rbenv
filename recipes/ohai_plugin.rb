@@ -29,7 +29,8 @@ template "#{node[:ohai][:plugin_path]}/rbenv.rb" do
   mode 0755
 
   variables(
-    :rbenv_bin => bin_path
+    :rbenv_bin => bin_path,
+    :rbenv_root => node[:rbenv][:root]
   )
 
   notifies :reload, "ohai[custom_plugins]", :immediately
