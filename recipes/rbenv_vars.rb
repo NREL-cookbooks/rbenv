@@ -1,8 +1,8 @@
 #
 # Cookbook Name:: rbenv
-# Recipe:: ruby_build
+# Recipe:: rbenv_vars
 #
-# Author:: Jamie Winsor (<jamie@vialstudios.com>)
+# Author:: Deepak Kannan (<kannan.deepak@gmail.com>)
 #
 # Copyright 2011-2012, Riot Games
 #
@@ -21,19 +21,10 @@
 
 include_recipe "git"
 
-git "#{Chef::Config[:file_cache_path]}/ruby-build" do
-  repository node[:ruby_build][:git_repository]
-  reference node[:ruby_build][:git_revision]
-  action :sync
-end
+plugin_path = "#{node[:rbenv][:root]}/plugins/rbenv-vars"
 
-bash "install_ruby_build" do
-  cwd "#{Chef::Config[:file_cache_path]}/ruby-build"
-  user "rbenv"
-  group "rbenv"
-  code <<-EOH
-    ./install.sh
-  EOH
-  environment 'PREFIX' => node[:ruby_build][:prefix]
-  not_if { desired_ruby_build_version? }
+git plugin_path do
+  repository node[:rbenv_vars][:git_repository]
+  reference  node[:rbenv_vars][:git_revision]
+  action :sync
 end

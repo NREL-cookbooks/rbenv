@@ -19,24 +19,11 @@
 # limitations under the License.
 #
 
-node.set[:rbenv][:root]          = "#{node[:rbenv][:install_prefix]}/rbenv"
-node.set[:ruby_build][:bin_path] = "#{node[:ruby_build][:prefix]}/bin"
+node.set[:rbenv][:root]          = rbenv_root
+node.set[:ruby_build][:prefix]   = node[:rbenv][:root]
+node.set[:ruby_build][:bin_path] = rbenv_binary_path
 
-package "curl"
-
-case node[:platform]
-when "redhat", "centos"
-  package "openssl-devel"
-  package "zlib-devel"
-  package "readline-devel"
-when "ubuntu", "debian"
-  package "build-essential"
-  package "openssl"
-  package "libssl-dev"
-  package "libreadline-dev"
-end
-
-include_recipe "git"
+include_recipe "rbenv::package_requirements"
 
 group "rbenv" do
   members node[:rbenv][:group_users] if node[:rbenv][:group_users]
@@ -82,4 +69,16 @@ ruby_block "initialize_rbenv" do
   end
 
   action :nothing
+end
+
+# rbenv init creates these directories as root because it is called
+# from /etc/profile.d/rbenv.sh But we want them to be owned by rbenv
+# check https://github.com/sstephenson/rbenv/blob/master/libexec/rbenv-init#L71
+%w{shims versions plugins}.each do |dir_name|
+  directory "#{node[:rbenv][:root]}/#{dir_name}" do
+    owner "rbenv"
+    group "rbenv"
+    mode "0775"
+    action [:create]
+  end
 end
