@@ -30,7 +30,43 @@ Array(node['rbenv']['rubies']).each do |rubie|
 end
 
 if node['rbenv']['global']
-  rbenv_global node['rbenv']['global']
+  rbenv_global node['rbenv']['global'] do
+    notifies :run, "ruby_block[create_predictable_gem_symlink]", :immediately
+  end
+
+  # Force set ruby ohai attributes.
+  #
+  # This is done before new global version of ruby is actually installed so
+  # that other cookbooks can easily reference the to-be-installed version. This
+  # is done to prevent the first chef run from incorrectly using the previous
+  # version of ruby when a new version of ruby is being installed.
+  #
+  # This is done at compile time, rather than just reloading the ohai
+  # attributes at convergence time, to deal with recipes like nginx's passenger
+  # that heavily use these path attributes in defining other attributes and
+  # resources at compile time.
+  node.automatic_attrs[:languages][:ruby][:bin_dir] = "#{node[:rbenv][:root_path]}/versions/#{node[:rbenv][:global]}/bin"
+  node.automatic_attrs[:languages][:ruby][:gem_bin] = "#{node[:rbenv][:root_path]}/versions/#{node[:rbenv][:global]}/bin/gem"
+  node.automatic_attrs[:languages][:ruby][:gems_dir] = "#{node[:rbenv][:root_path]}/versions/#{node[:rbenv][:global]}/gems"
+  node.automatic_attrs[:languages][:ruby][:ruby_bin] = "#{node[:rbenv][:root_path]}/versions/#{node[:rbenv][:global]}/bin/ruby"
+
+  # Create a symlink to the real gem directory.
+  #
+  # This is used by the automatic_attrs above. This is necessary so that at
+  # compile time we have a predictable path where the gems will be installed
+  # (because the version number in the real directory like
+  # lib/ruby/gems/VERSION is hard to predict ahead of time).
+  predictable_gem_symlink = "#{node[:rbenv][:root_path]}/versions/#{node[:rbenv][:global]}/gems"
+  ruby_block "create_predictable_gem_symlink" do
+    block do
+      real_gem_dir = `source /etc/profile.d/rbenv.sh && gem env gemdir`.strip
+      ::FileUtils.ln_s(real_gem_dir, predictable_gem_symlink)
+    end
+
+    only_if do
+      ::Dir.exists?("#{node[:rbenv][:root_path]}/versions/#{node[:rbenv][:global]}") && !::File.exists?(predictable_gem_symlink)
+    end
+  end
 end
 
 node['rbenv']['gems'].each_pair do |rubie, gems|
