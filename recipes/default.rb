@@ -17,6 +17,12 @@
 # limitations under the License.
 #
 
+# Make sure the ruby_build cookbook gets loaded before rbenv so it's availible
+# and up to date.
+if node.recipe?('ruby_build')
+  include_recipe 'ruby_build'
+end
+
 class Chef::Recipe
   # mix in recipe helpers
   include Chef::Rbenv::RecipeHelpers
