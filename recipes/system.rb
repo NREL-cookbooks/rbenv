@@ -31,7 +31,7 @@ end
 
 if node['rbenv']['global']
   rbenv_global node['rbenv']['global'] do
-    notifies :run, "ruby_block[create_predictable_gem_symlink]", :immediately
+    notifies :create, "ruby_block[create_predictable_gem_symlink]", :immediately
   end
 
   # Force set ruby ohai attributes.
