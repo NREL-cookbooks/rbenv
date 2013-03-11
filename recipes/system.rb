@@ -64,7 +64,7 @@ if node['rbenv']['global']
     end
 
     only_if do
-      ::Dir.exists?("#{node[:rbenv][:root_path]}/versions/#{node[:rbenv][:global]}") && !::File.exists?(predictable_gem_symlink)
+      ::File.exists?("#{node[:rbenv][:root_path]}/versions/#{node[:rbenv][:global]}") && !::File.exists?(predictable_gem_symlink)
     end
   end
 end
