@@ -22,7 +22,7 @@ include_recipe "rbenv::system_install"
 Array(node['rbenv']['rubies']).each do |rubie|
   if rubie.is_a?(Hash)
     # Ensure java gets installed prior to JRuby.
-    if rubyie['name'] =~ /^jruby-/
+    if rubie['name'] =~ /^jruby-/
       include_recipe "java"
     end
 
