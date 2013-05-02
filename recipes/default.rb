@@ -17,6 +17,11 @@
 # limitations under the License.
 #
 
+# Always install build-essentials. A plain jruby install seems to even require
+# this (or else installing bombs out when installing jruby-launcher). Also, C
+# extensions typically requires this, so we might as well go ahead and install.
+include_recipe "build-essential"
+
 # Make sure the ruby_build cookbook gets loaded before rbenv so it's availible
 # and up to date.
 if node.recipe?('ruby_build')
