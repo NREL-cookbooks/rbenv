@@ -44,6 +44,9 @@ default['rbenv']['user_gems'] = Hash.new
 # whether to create profile.d shell script
 default['rbenv']['create_profiled'] = true
 
+# by default install rdoc and ri
+default['rbenv']['no_rdoc_ri'] = false
+
 case platform
 when "redhat","centos","fedora", "amazon", "scientific"
   node.set['rbenv']['install_pkgs']   = %w{git grep}

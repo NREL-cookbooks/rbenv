@@ -77,7 +77,19 @@ if node['rbenv']['global']
       ::File.exists?("#{node[:rbenv][:root_path]}/versions/#{node[:rbenv][:global]}") && !::File.exists?(predictable_gem_symlink)
     end
   end
+
+  # Configure the gemrc file to not install rdoc and ri for everyone
+  if node['rbenv']['no_rdoc_ri']
+    template "/etc/gemrc" do
+      source  "gemrc.erb"
+      owner   "root"
+      mode    "0755"
+      #only_if {node['rbenv']['gems'].size > 0}
+    end
+  end
 end
+
+
 
 node['rbenv']['gems'].each_pair do |rubie, gems|
   Array(gems).each do |gem|
