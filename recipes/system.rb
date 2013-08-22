@@ -69,7 +69,7 @@ if node['rbenv']['global']
   predictable_gem_symlink = "#{node[:rbenv][:root_path]}/versions/#{node[:rbenv][:global]}/gems"
   ruby_block "create_predictable_gem_symlink" do
     block do
-      real_gem_dir = `/bin/bash -c "source /etc/profile.d/rbenv.sh && gem env gemdir"`.strip
+      real_gem_dir = `/bin/bash -c "source /etc/profile.d/rbenv.sh && rbenv shell #{node['rbenv']['global']} && gem env gemdir"`.strip
       ::FileUtils.ln_s(real_gem_dir, predictable_gem_symlink)
     end
 
