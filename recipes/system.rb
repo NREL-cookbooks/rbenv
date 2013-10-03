@@ -66,15 +66,29 @@ if node['rbenv']['global']
   # compile time we have a predictable path where the gems will be installed
   # (because the version number in the real directory like
   # lib/ruby/gems/VERSION is hard to predict ahead of time).
-  predictable_gem_symlink = "#{node[:rbenv][:root_path]}/versions/#{node[:rbenv][:global]}/gems"
+  global_root_dir = "#{node[:rbenv][:root_path]}/versions/#{node[:rbenv][:global]}"
+  predictable_gem_symlink = "#{global_root_dir}/gems"
   ruby_block "create_predictable_gem_symlink" do
     block do
+      puts %(/bin/bash -c "source /etc/profile.d/rbenv.sh && rbenv shell #{node['rbenv']['global']} && gem env gemdir")
       real_gem_dir = `/bin/bash -c "source /etc/profile.d/rbenv.sh && rbenv shell #{node['rbenv']['global']} && gem env gemdir"`.strip
+      puts real_gem_dir
+      ::FileUtils.rm_f(predictable_gem_symlink)
       ::FileUtils.ln_s(real_gem_dir, predictable_gem_symlink)
     end
 
     only_if do
-      ::File.exists?("#{node[:rbenv][:root_path]}/versions/#{node[:rbenv][:global]}") && !::File.exists?(predictable_gem_symlink)
+      run = false
+
+      if(::File.exists?(global_root_dir))
+        if(!::File.exists?(predictable_gem_symlink))
+          run = true
+        elsif(!::File.readlink(predictable_gem_symlink).start_with?(global_root_dir))
+          run = true
+        end
+      end
+
+      run
     end
   end
 
