@@ -70,9 +70,8 @@ if node['rbenv']['global']
   predictable_gem_symlink = "#{global_root_dir}/gems"
   ruby_block "create_predictable_gem_symlink" do
     block do
-      puts %(/bin/bash -c "source /etc/profile.d/rbenv.sh && rbenv shell #{node['rbenv']['global']} && gem env gemdir")
       real_gem_dir = `/bin/bash -c "source /etc/profile.d/rbenv.sh && rbenv shell #{node['rbenv']['global']} && gem env gemdir"`.strip
-      puts real_gem_dir
+      Chef::Log.info "Real gem directory set to: #{real_gem_dir}"
       ::FileUtils.rm_f(predictable_gem_symlink)
       ::FileUtils.ln_s(real_gem_dir, predictable_gem_symlink)
     end
